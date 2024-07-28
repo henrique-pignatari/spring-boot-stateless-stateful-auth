@@ -1,0 +1,6 @@
+server:
+  port: ${PORT:8081}
+
+app:
+  token:
+    secret-key: ${JWT_SECRET_KEY:Y3Vyc28tYXV0ZW50aWNhY2FvLXN0YXRlZnVsLXN0YXRlbGVzcy1taWNyb3NlcnZpY29zLWVzc2Etc3RyaW5nLXRlbS1xdWUtc2VyLW1haW9yLWRvLXF1ZS1hLWRvLXZpZGVv}
