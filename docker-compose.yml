@@ -1,0 +1,110 @@
+version: "3"
+
+services:
+  stateless-auth-db:
+    container_name: stateless-auth-db
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: auth-db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: senha123
+    ports:
+      - "5432:5432"
+    networks:
+      - auth
+
+  stateful-auth-db:
+    container_name: stateful-auth-db
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: auth-db
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: senha123
+    ports:
+      - "5433:5432"
+    networks:
+      - auth
+
+  token-redis:
+    container_name: token-redis
+    image: redis:latest
+    networks:
+      - auth
+    ports:
+      - "6379:6379"
+
+  stateless-auth-api:
+    build: "./stateless/stateless-auth-api"
+    depends_on:
+      - stateless-auth-db
+    container_name: stateless-auth-api
+    environment:
+      - PORT=8080
+      - DB_HOST=stateless-auth-db
+      - DB_PORT=5432
+      - DB_NAME=auth-db
+      - DB_USER=admin
+      - DB_PASSWORD=senha123
+      - JWT_SECRET_KEY=Y3Vyc28tYXV0ZW50aWNhY2FvLXN0YXRlZnVsLXN0YXRlbGVzcy1taWNyb3NlcnZpY29zLWVzc2Etc3RyaW5nLXRlbS1xdWUtc2VyLW1haW9yLWRvLXF1ZS1hLWRvLXZpZGVv
+    networks:
+      - auth
+    ports:
+      - "8080:8080"
+
+  stateless-any-api:
+    build: "./stateless/stateless-any-api"
+    container_name: stateless-any-api
+    environment:
+      - PORT=8081
+    networks:
+      - auth
+    ports:
+      - "8081:8081"
+
+  stateful-auth-api:
+    build: "./stateful/stateful-auth-api"
+    depends_on:
+      - stateful-auth-db
+    container_name: stateful-auth-api
+    environment:
+      - PORT=8080
+      - DB_HOST=stateful-auth-db
+      - DB_PORT=5432
+      - DB_NAME=auth-db
+      - DB_USER=admin
+      - DB_PASSWORD=senha123
+    networks:
+      - auth
+    ports:
+      - "8082:8082"
+
+  stateful-any-api:
+    build: "./stateful/stateful-any-api"
+    container_name: stateful-any-api
+    environment:
+      - PORT=8083
+    networks:
+      - auth
+    ports:
+      - "8083:8083"
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    networks:
+      - auth
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@email.com
+      - PGADMIN_DEFAULT_PASSWORD=senha123
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  pgadmin_data:
+
+networks:
+  auth:
+    driver: bridge
